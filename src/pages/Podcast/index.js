@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import PlayerActions from '~/store/ducks/player';
+
 import {
   Container,
   EpisodeList,
@@ -17,12 +21,19 @@ import {
   Author,
 } from './styles';
 
-export default class Podcast extends Component {
+class Podcast extends Component {
   componentDidMount() {}
 
   handleBack = () => {
     const { navigation } = this.props;
     navigation.goBack();
+  };
+
+  handlePlay = (episodeId) => {
+    const { setPodcastRequest, navigation } = this.props;
+    const podcast = navigation.getParam('podcast');
+
+    setPodcastRequest(podcast, episodeId);
   };
 
   render() {
@@ -40,7 +51,7 @@ export default class Podcast extends Component {
               </BackButton>
               <Cover source={{ uri: podcast.cover }} />
               <PodcastTitle>{podcast.title}</PodcastTitle>
-              <PlayButton onpress={() => {}}>
+              <PlayButton onPress={() => this.handlePlay()}>
                 <PlayButtonText>REPRODUZIR</PlayButtonText>
               </PlayButton>
             </PodcastDetails>
@@ -48,7 +59,7 @@ export default class Podcast extends Component {
           data={podcast.tracks}
           keyExtractor={episode => String(episode.id)}
           renderItem={({ item: episode }) => (
-            <Episode>
+            <Episode onPress={() => this.handlePlay(episode.id)}>
               <Title>{episode.title}</Title>
               <Author>{episode.artist}</Author>
             </Episode>
@@ -58,3 +69,10 @@ export default class Podcast extends Component {
     );
   }
 }
+
+const mapDispatchToProps = dispatch => bindActionCreators(PlayerActions, dispatch);
+
+export default connect(
+  null,
+  mapDispatchToProps,
+)(Podcast);
